@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<ruleset name="Netzstrategen PHP Coding Standards">
+  <description>Netzstrategen PHP Coding Standards</description>
+
+  <exclude-pattern>*/node_modules/*</exclude-pattern>
+
+  <file>.</file>
+
+  <arg name="extensions" value="php"/>
+  <arg name="colors"/>
+
+  <!-- Show sniff codes in all reports -->
+  <arg value="s"/>
+  <!-- Exclude Warnings -->
+  <arg value="n"/>
+
+  <rule ref="Drupal">
+    <exclude name="Drupal.Commenting.FileComment.Missing" />
+    <exclude name="Generic.PHP.DisallowShortOpenTag.EchoFound"/>
+    <exclude name="Drupal.Commenting.FileComment.NamespaceNoFileDoc"/>
+    <!-- See: https://github.com/squizlabs/PHP_CodeSniffer/issues/453 -->
+    <exclude name="Zend.Files.ClosingTag.NotAllowed"/>
+
+    <!--
+         Exclusions required because WordPress.
+    -->
+    <exclude name="Drupal.NamingConventions.ValidGlobal.GlobalUnderScore"/>
+    <exclude name="Drupal.Commenting.InlineComment.DocBlock"/>
+    <exclude name="Drupal.NamingConventions.ValidFunctionName.ScopeNotCamelCaps"/>
+  </rule>
+  <rule ref="Generic.PHP.Syntax"/>
+</ruleset>

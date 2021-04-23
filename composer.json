@@ -1,0 +1,14 @@
+{
+    "name": "makers99/wp-cli-db-export-clean",
+    "type": "wordpress-plugin",
+    "authors": [
+        {
+            "name": "netzstrategen",
+            "email": "hallo@netzstrategen.com",
+            "homepage": "https://makers99.com"
+        }
+    ],
+    "require": {
+        "ifsnop/mysqldump-php": "^2.9"
+    }
+}
