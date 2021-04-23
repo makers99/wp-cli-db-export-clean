@@ -39,6 +39,6 @@ spl_autoload_register(__NAMESPACE__ . '\classloader');
 
 require __DIR__ . '/vendor/autoload.php';
 
-add_action('cli_init', function() {
+add_action('cli_init', function () {
   WP_CLI::add_command('export-clean', __NAMESPACE__ . '\CliCommand');
 });
