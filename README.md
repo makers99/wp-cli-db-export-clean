@@ -19,12 +19,15 @@ This is meant to be used as a must-use plugin, for installation the steps are:
     ```
 2. Clone this repository in its own foder.
     ```sh
-    git clone git@github.com:makers99/wp-cli-db-export-clean.git wp-content/mu-plugins/wp-cli-db-export-clean
+    git submodule add --name wp-cli-db-export-clean -- git@github.com:netzstrategen/wp-cli-db-export-clean.git wp-content/mu-plugins/wp-cli-db-export-clean
+    cd wp-content/mu-plugins/wp-cli-db-export-clean
+    composer install
+    cd ..
     ```
 3. Create the main mu-plugin file and ensure cloned plugin is available.
     ```sh
-    touch wp-content/mu-plugins/wp-cli-db-export-clean.php
-    vi wp-content/mu-plugins/wp-cli-db-export-clean.php
+    touch wp-cli-db-export-clean.php
+    vi wp-cli-db-export-clean.php
     ```
     The content of `wp-content/mu-plugins/wp-cli-db-export-clean.php` is:
     ```php
