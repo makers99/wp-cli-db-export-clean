@@ -1,8 +1,10 @@
 <?php
 
 /**
+ * WP-CLI extension for minimum viable database dump.
+ *
  * @file
- * Contains \Netzstrategen\WP_CLI_DB_Clean_Export\CliCommand
+ * @contains \Netzstrategen\WP_CLI_DB_Clean_Export\CliCommand
  */
 
 namespace Netzstrategen\WP_CLI_DB_Clean_Export;
@@ -18,6 +20,36 @@ use Ifsnop\Mysqldump\Mysqldump as IMysqldump;
  */
 class CliCommand extends \WP_CLI_Command {
 
+  /**
+   * Sensitive wp options which can be blanked out.
+   *
+   * @var array
+   */
+  const CLEAN_EXPORT_DISPOSE_OPTIONS = [
+    'woocommerce_paypal_settings',
+    'woocommerce_paypal_express_settings',
+    'woocommerce_paypal_plus_settings',
+    'woocommerce_ppec_paypal_settings',
+    'wplister_paypal_email',
+    'rg_gforms_key',
+    'woothemes_helper_master_key',
+    'optimus_key',
+    'elementor_pro_license_key',
+    'searchwp_license_key',
+    'gf_zero_spam_key',
+    'wple_api_key',
+    'mbc_woogoogad_api_key',
+    'wpla_api_key',
+    'woocommerce_amazon_payments_advanced_private_key',
+  ];
+
+  /**
+   * Prefix for naming.
+   *
+   * @var string
+   */
+  const PREFIX = 'clean-export';
+
   public function export() {
     global $wpdb;
     // Set allowed email hosts.
@@ -28,14 +60,6 @@ class CliCommand extends \WP_CLI_Command {
       $allowedEmails = ['@netzstrategen.com'];
     }
 
-    // Set target options containing credentials to be emptied before dump.
-    if (defined('CLEAN_EXPORT_DISPOSE_OPTIONS') && CLEAN_EXPORT_DISPOSE_OPTIONS) {
-      $optionsToBlank = (array) CLEAN_EXPORT_DISPOSE_OPTIONS;
-    }
-    else {
-      $optionsToBlank = ['woocommerce_paypal_settings','woocommerce_paypal_express_settings','woocommerce_paypal_plus_settings','woocommerce_ppec_paypal_settings','wplister_paypal_email','rg_gforms_key','woothemes_helper_master_key','optimus_key','elementor_pro_license_key','searchwp_license_key','gf_zero_spam_key','wple_api_key','mbc_woogoogad_api_key','wpla_api_key','woocommerce_amazon_payments_advanced_private_key'];
-    }
-
     // Get total number of tables for the progress bar.
     $databaseTableCount = $wpdb->get_col($wpdb->prepare("SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '%s'", DB_NAME))[0];
 
@@ -43,12 +67,11 @@ class CliCommand extends \WP_CLI_Command {
     $droppedUsersIds = implode(',', $wpdb->get_col(
       $wpdb->prepare("SELECT u.ID FROM {$wpdb->prefix}users u WHERE u.user_email NOT REGEXP ('%s')", implode('|', $allowedEmails)
     )));
+    $droppedUsersIds = apply_filters(static::PREFIX . '-dropped-user-ids', $droppedUsersIds);
 
     try {
       $dump = new IMysqldump('mysql:host=localhost;dbname=' . DB_NAME, DB_USER, DB_PASSWORD);
-
-      // Set unnecessary/sensitive data.
-      $dump->setTableWheres([
+      $tableWheres = apply_filters(static::PREFIX . '-table-wheres', [
         "{$wpdb->prefix}users" => "ID NOT IN ({$droppedUsersIds})",
         "{$wpdb->prefix}usermeta" => "user_id NOT IN ({$droppedUsersIds})",
         "{$wpdb->prefix}posts" => "post_type NOT IN (\"shop_order\", \"shop_subscription\")",
@@ -56,7 +79,10 @@ class CliCommand extends \WP_CLI_Command {
         // Ignore all sessions.
         "{$wpdb->prefix}woocommerce_sessions" => 'session_id = 0',
       ]);
+      $dump->setTableWheres($tableWheres);
 
+      // Set target options containing credentials to be emptied before dump.
+      $optionsToBlank = apply_filters(static::PREFIX . '-dispose-options', static::CLEAN_EXPORT_DISPOSE_OPTIONS);
       $dump->setTransformTableRowHook(function ($tableName, array $row) use ($optionsToBlank, $wpdb) {
         if ($tableName === "{$wpdb->prefix}options" && in_array($row['meta_key'], $optionsToBlank)) {
           $row['meta_vaue'] = '';
@@ -70,7 +96,6 @@ class CliCommand extends \WP_CLI_Command {
       $dump->setInfoHook(function ($object, $info) use ($progress) {
         if ($object === 'table') {
           $progress->tick();
-          // WP_CLI::log($info['name'] . ' -> ' . $info['rowCount']);
         }
       });
 
