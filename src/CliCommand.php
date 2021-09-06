@@ -52,13 +52,15 @@ class CliCommand extends \WP_CLI_Command {
 
   public function export() {
     global $wpdb;
+
     // Set allowed email hosts.
-    if (defined('CLEAN_EXPORT_ALLOWED_EMAILS') && CLEAN_EXPORT_ALLOWED_EMAILS) {
-      $allowedEmails = array_map('trim', explode(',', DISABLE_EXTERNAL_EMAILS_EXCEPT));
-    }
-    else {
-      $allowedEmails = ['@netzstrategen.com'];
-    }
+    $adminsEmails = array_map(function ($user) {
+      return reset($user);
+    }, get_users([
+      'fields' => ['user_email'],
+      'role__in' => ['administrator'],
+    ]));
+    $allowedEmails = apply_filters(static::PREFIX . '-allowed-emails', $adminsEmails);
 
     // Get total number of tables for the progress bar.
     $databaseTableCount = $wpdb->get_col($wpdb->prepare("SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '%s'", DB_NAME))[0];
