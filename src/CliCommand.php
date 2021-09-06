@@ -50,7 +50,7 @@ class CliCommand extends \WP_CLI_Command {
    */
   const PREFIX = 'clean-export';
 
-  public function export() {
+  public function export($args, $assoc_args) {
     global $wpdb;
 
     // Set allowed email hosts.
@@ -114,11 +114,12 @@ class CliCommand extends \WP_CLI_Command {
         }
       });
 
-      $dump->start(ABSPATH . 'clean-export.sql');
+      $file = $assoc_args['file'] ?? ABSPATH . 'clean-export.sql';
+      $dump->start($file);
 
       $progress->finish();
 
-      WP_CLI::success('Dump file is available at ' . ABSPATH . 'clean-export.sql');
+      WP_CLI::success('Dump file is available at ' . $file);
     }
     catch (\Exception $e) {
       WP_CLI::error($e->getMessage());

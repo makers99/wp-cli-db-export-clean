@@ -11,6 +11,9 @@ Adds wp cli command `export-clean` and produces a mysql dump free of customer
 related private data and sensitive credentials, while retaining all administrator
 users and their related fields.
 
+This accepts a `--file` flag for defining path and filename, if none is provied
+it will default to current location and filename `clean-export.sql`.
+
 == Installation ==
 
 This is meant to be used as a must-use plugin, installation the steps are:
