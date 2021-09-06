@@ -50,32 +50,47 @@ class CliCommand extends \WP_CLI_Command {
    */
   const PREFIX = 'clean-export';
 
-  public function export() {
+  public function export($args, $assoc_args) {
     global $wpdb;
+
     // Set allowed email hosts.
-    if (defined('CLEAN_EXPORT_ALLOWED_EMAILS') && CLEAN_EXPORT_ALLOWED_EMAILS) {
-      $allowedEmails = array_map('trim', explode(',', DISABLE_EXTERNAL_EMAILS_EXCEPT));
-    }
-    else {
-      $allowedEmails = ['@netzstrategen.com'];
-    }
+    $adminsEmails = array_map(function ($user) {
+      return reset($user);
+    }, get_users([
+      'fields' => ['user_email'],
+      'role__in' => ['administrator'],
+    ]));
+    $allowedEmails = apply_filters(static::PREFIX . '-allowed-emails', $adminsEmails);
 
     // Get total number of tables for the progress bar.
     $databaseTableCount = $wpdb->get_col($wpdb->prepare("SELECT count(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '%s'", DB_NAME))[0];
 
     // Retain user ids about to be skipped for further filters.
-    $droppedUsersIds = implode(',', $wpdb->get_col(
-      $wpdb->prepare("SELECT u.ID FROM {$wpdb->prefix}users u WHERE u.user_email NOT REGEXP ('%s')", implode('|', $allowedEmails)
+    $allowedUserIds = implode(',', $wpdb->get_col(
+      $wpdb->prepare("SELECT u.ID FROM {$wpdb->prefix}users u WHERE u.user_email REGEXP ('%s')", implode('|', $allowedEmails)
     )));
-    $droppedUsersIds = apply_filters(static::PREFIX . '-dropped-user-ids', $droppedUsersIds);
+    $allowedUserIds = apply_filters(static::PREFIX . '-allowed-user-ids', $allowedUserIds);
+
+    $allowedPostIds = implode(',', $wpdb->get_col($d = "
+      SELECT p.ID FROM {$wpdb->prefix}posts p
+        JOIN {$wpdb->prefix}postmeta pm ON pm.post_id = p.ID
+        WHERE p.post_type IN (\"shop_order\", \"shop_subscription\")
+          AND pm.meta_key = '_customer_user'
+          AND pm.meta_value IN ({$allowedUserIds})
+    "));
+
+    $postTableWheres = ['post_type NOT IN ("revision")'];
+    if ($allowedPostIds) {
+      $postTableWheres[] = '(post_type NOT IN ("shop_order", "shop_subscription") OR ID IN (' . $allowedPostIds . '))';
+    }
 
     try {
       $dump = new IMysqldump('mysql:host=localhost;dbname=' . DB_NAME, DB_USER, DB_PASSWORD);
       $tableWheres = apply_filters(static::PREFIX . '-table-wheres', [
-        "{$wpdb->prefix}users" => "ID NOT IN ({$droppedUsersIds})",
-        "{$wpdb->prefix}usermeta" => "user_id NOT IN ({$droppedUsersIds})",
-        "{$wpdb->prefix}posts" => "post_type NOT IN (\"shop_order\", \"shop_subscription\")",
-        "{$wpdb->prefix}postmeta" => "post_id NOT IN (SELECT p.ID FROM {$wpdb->prefix}posts p WHERE p.post_type IN (\"shop_order\", \"shop_subscription\"))",
+        "{$wpdb->prefix}users" => "ID IN ({$allowedUserIds})",
+        "{$wpdb->prefix}usermeta" => "user_id IN ({$allowedUserIds})",
+        "{$wpdb->prefix}posts" => implode(' AND ', $postTableWheres),
+        "{$wpdb->prefix}postmeta" => "post_id NOT IN (SELECT p.ID FROM {$wpdb->prefix}posts p WHERE p.post_type IN (\"revision\", \"shop_order\", \"shop_subscription\"))",
         // Ignore all sessions.
         "{$wpdb->prefix}woocommerce_sessions" => 'session_id = 0',
       ]);
@@ -99,11 +114,12 @@ class CliCommand extends \WP_CLI_Command {
         }
       });
 
-      $dump->start(ABSPATH . 'clean-export.sql');
+      $file = $assoc_args['file'] ?? ABSPATH . 'clean-export.sql';
+      $dump->start($file);
 
       $progress->finish();
 
-      WP_CLI::success('Dump file is available at ' . ABSPATH . 'clean-export.sql');
+      WP_CLI::success('Dump file is available at ' . $file);
     }
     catch (\Exception $e) {
       WP_CLI::error($e->getMessage());
