@@ -85,7 +85,7 @@ class CliCommand extends \WP_CLI_Command {
     }
 
     try {
-      $dump = new IMysqldump('mysql:host=localhost;dbname=' . DB_NAME, DB_USER, DB_PASSWORD);
+      $dump = new IMysqldump('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASSWORD);
       $tableWheres = apply_filters(static::PREFIX . '-table-wheres', [
         "{$wpdb->prefix}users" => "ID IN ({$allowedUserIds})",
         "{$wpdb->prefix}usermeta" => "user_id IN ({$allowedUserIds})",
@@ -99,7 +99,7 @@ class CliCommand extends \WP_CLI_Command {
       // Set target options containing credentials to be emptied before dump.
       $optionsToBlank = apply_filters(static::PREFIX . '-dispose-options', static::CLEAN_EXPORT_DISPOSE_OPTIONS);
       $dump->setTransformTableRowHook(function ($tableName, array $row) use ($optionsToBlank, $wpdb) {
-        if ($tableName === "{$wpdb->prefix}options" && in_array($row['meta_key'], $optionsToBlank)) {
+        if ($tableName === "{$wpdb->prefix}options" && isset($row['meta_key']) && in_array($row['meta_key'], $optionsToBlank)) {
           $row['meta_vaue'] = '';
         }
         return $row;
