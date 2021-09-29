@@ -17,13 +17,14 @@ it will default to current location and filename `clean-export.sql`.
 == Installation ==
 
 This is meant to be used as a must-use plugin, installation the steps are:
+
 1. Create a `wp-content/mu-plugins` folder if it not exists already.
     ```sh
     mkdir wp-content/mu-plugins
     ```
 2. Clone this repository in its own foder.
     ```sh
-    git submodule add --name wp-cli-db-export-clean -- git@github.com:netzstrategen/wp-cli-db-export-clean.git wp-content/mu-plugins/wp-cli-db-export-clean
+    git submodule add --name wp-cli-db-export-clean -- git@github.com:makers99/wp-cli-db-export-clean.git wp-content/mu-plugins/wp-cli-db-export-clean
     cd wp-content/mu-plugins/wp-cli-db-export-clean
     composer install
     cd ..
@@ -38,15 +39,13 @@ This is meant to be used as a must-use plugin, installation the steps are:
     <?php
 
     /**
-    * Install wp-cli-db-export-clean mu-plugin.
-    *
-    * Plugin Name: WordPress CLI clean database export.
-    */
+     * Plugin Name: WordPress CLI clean database export.
+     */
 
     require_once __DIR__ . '/wp-cli-db-export-clean/plugin.php';
-
     ```
 
 = Requirements =
 
-* PHP 7.0 or later.
+* PHP 7.4 or later.
+
