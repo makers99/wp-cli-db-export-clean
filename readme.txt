@@ -29,7 +29,7 @@ The command accepts the result filename as argument. If omitted, it defaults to
 
 2. Register the command for early WP-CLI bootstrap.
     ```sh
-    echo -e "require:\n  - vendor/makers99/wp-cli-db-export-clean/plugin.php" >> .wp-cli.yml
+    echo -e "require:\n  - vendor/makers99/wp-cli-db-export-clean/package.php" >> .wp-cli.yml
     ```
     Or manually:
     ```sh
@@ -37,7 +37,7 @@ The command accepts the result filename as argument. If omitted, it defaults to
     ```
     ```yaml
     require:
-      - wp-content/mu-plugins/wp-cli-db-export-clean.php
+      - vendor/makers99/wp-cli-db-export-clean/package.php
     ```
 
 
