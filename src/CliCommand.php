@@ -14,9 +14,9 @@ use \WP_CLI\Utils;
 use Ifsnop\Mysqldump\Mysqldump as IMysqldump;
 
 /**
- * Adds 'export-clean' WP CLI command.
+ * Adds 'export' WP CLI command.
  *
- * @example wp export-clean --path="../live-clean.sql"
+ * @example wp export-clean export
  */
 class CliCommand extends \WP_CLI_Command {
 
@@ -50,7 +50,7 @@ class CliCommand extends \WP_CLI_Command {
    */
   const PREFIX = 'clean-export';
 
-  public function __invoke($args, $assoc_args) {
+  public function export($args, $assoc_args) {
     global $wpdb;
 
     // Set allowed email hosts.
