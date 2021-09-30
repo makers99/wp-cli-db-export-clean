@@ -7,6 +7,10 @@ namespace Composer\Autoload;
 class ComposerStaticInit451d81277e04cb387b46be837ee462d9
 {
     public static $prefixLengthsPsr4 = array (
+        'M' => 
+        array (
+            'Makers99\\WpDbExportClean\\' => 25,
+        ),
         'I' => 
         array (
             'Ifsnop\\' => 7,
@@ -14,10 +18,31 @@ class ComposerStaticInit451d81277e04cb387b46be837ee462d9
     );
 
     public static $prefixDirsPsr4 = array (
+        'Makers99\\WpDbExportClean\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
+        ),
         'Ifsnop\\' => 
         array (
             0 => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop',
         ),
+    );
+
+    public static $classMap = array (
+        'Ifsnop\\Mysqldump\\CompressBzip2' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+        'Ifsnop\\Mysqldump\\CompressGzip' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+        'Ifsnop\\Mysqldump\\CompressGzipstream' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+        'Ifsnop\\Mysqldump\\CompressManagerFactory' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+        'Ifsnop\\Mysqldump\\CompressMethod' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+        'Ifsnop\\Mysqldump\\CompressNone' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+        'Ifsnop\\Mysqldump\\Mysqldump' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+        'Ifsnop\\Mysqldump\\TypeAdapter' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+        'Ifsnop\\Mysqldump\\TypeAdapterDblib' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+        'Ifsnop\\Mysqldump\\TypeAdapterFactory' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+        'Ifsnop\\Mysqldump\\TypeAdapterMysql' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+        'Ifsnop\\Mysqldump\\TypeAdapterPgsql' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+        'Ifsnop\\Mysqldump\\TypeAdapterSqlite' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+        'Makers99\\WpDbExportClean\\CliCommand' => __DIR__ . '/../..' . '/src/CliCommand.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
@@ -25,6 +50,7 @@ class ComposerStaticInit451d81277e04cb387b46be837ee462d9
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit451d81277e04cb387b46be837ee462d9::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit451d81277e04cb387b46be837ee462d9::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit451d81277e04cb387b46be837ee462d9::$classMap;
 
         }, null, ClassLoader::class);
     }

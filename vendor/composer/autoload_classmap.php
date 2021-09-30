@@ -6,4 +6,18 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Ifsnop\\Mysqldump\\CompressBzip2' => $vendorDir . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+    'Ifsnop\\Mysqldump\\CompressGzip' => $vendorDir . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+    'Ifsnop\\Mysqldump\\CompressGzipstream' => $vendorDir . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+    'Ifsnop\\Mysqldump\\CompressManagerFactory' => $vendorDir . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+    'Ifsnop\\Mysqldump\\CompressMethod' => $vendorDir . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+    'Ifsnop\\Mysqldump\\CompressNone' => $vendorDir . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+    'Ifsnop\\Mysqldump\\Mysqldump' => $vendorDir . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+    'Ifsnop\\Mysqldump\\TypeAdapter' => $vendorDir . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+    'Ifsnop\\Mysqldump\\TypeAdapterDblib' => $vendorDir . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+    'Ifsnop\\Mysqldump\\TypeAdapterFactory' => $vendorDir . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+    'Ifsnop\\Mysqldump\\TypeAdapterMysql' => $vendorDir . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+    'Ifsnop\\Mysqldump\\TypeAdapterPgsql' => $vendorDir . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+    'Ifsnop\\Mysqldump\\TypeAdapterSqlite' => $vendorDir . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+    'Makers99\\WpDbExportClean\\CliCommand' => $baseDir . '/src/CliCommand.php',
 );
