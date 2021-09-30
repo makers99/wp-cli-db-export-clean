@@ -17,5 +17,10 @@
         "psr-4": {
             "Makers99\\WpDbExportClean\\": "src/"
         }
+    },
+    "scripts": {
+        "post-package-install": [
+            "echo -e \"require:\n  - vendor/makers99/wp-cli-db-export-clean/plugin.php\" >> .wp-cli.yml"
+        ]
     }
 }
