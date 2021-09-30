@@ -1,6 +1,6 @@
 {
     "name": "makers99/wp-cli-db-export-clean",
-    "type": "wordpress-plugin",
+    "type": "wp-cli-package",
     "description": "Adds WP-CLI command `wp db export-clean` to produce a database dump without sensitive data.",
     "license": "GPL-2.0-or-later",
     "authors": [
