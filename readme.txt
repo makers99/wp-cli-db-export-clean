@@ -7,43 +7,59 @@ License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 == Description ==
 
-Adds wp cli command `export-clean` and produces a mysql dump free of customer
-related private data and sensitive credentials, while retaining all administrator
-users and their related fields.
+Adds the WP-CLI command `wp db export-clean` to create a MySQL database dump
+without sensitive data related to customers and API secrets/credentials, while
+retaining all administrative users and their related data.
 
-This accepts a `--file` flag for defining path and filename, if none is provied
-it will default to current location and filename `clean-export.sql`.
+Revisions are excluded as well to minimize the size.
+
+The command accepts the result filename as argument. If omitted, it defaults to
+`clean.sql`.
+
 
 == Installation ==
 
 This is meant to be used as a must-use plugin, installation the steps are:
 
-1. Create a `wp-content/mu-plugins` folder if it not exists already.
+1. Create a folder for must-use plugins.
     ```sh
-    mkdir wp-content/mu-plugins
+    mkdir -p wp-content/mu-plugins
     ```
-2. Clone this repository in its own foder.
+
+2. CloneClone this repository as a Git submodule.
     ```sh
-    git submodule add --name wp-cli-db-export-clean -- git@github.com:makers99/wp-cli-db-export-clean.git wp-content/mu-plugins/wp-cli-db-export-clean
-    cd wp-content/mu-plugins/wp-cli-db-export-clean
-    composer install
-    cd ..
+    git submodule add --name wp-cli-db-export-clean git@github.com:makers99/wp-cli-db-export-clean.git wp-content/mu-plugins/wp-cli-db-export-clean
     ```
+
 3. Create the main mu-plugin file and ensure cloned plugin is available.
     ```sh
-    touch wp-cli-db-export-clean.php
-    vi wp-cli-db-export-clean.php
+    vi wp-content/mu-plugins/wp-cli-db-export-clean.php
     ```
-    The content of `wp-content/mu-plugins/wp-cli-db-export-clean.php` is:
     ```php
     <?php
 
-    /**
-     * Plugin Name: WordPress CLI clean database export.
-     */
+    /*
+      Plugin Name: wp db export-clean
+      Description: Adds WP-CLI command `wp db export-clean` to produce a database dump without sensitive data.
+      Version: 1.0.0
+      Author: makers99
+      Author URI: https://makers99.com/
+      License: GPL-2.0+
+      License URI: http://www.gnu.org/licenses/gpl-2.0
+    */
 
-    require_once __DIR__ . '/wp-cli-db-export-clean/plugin.php';
+    include_once __DIR__ . '/wp-cli-db-export-clean/plugin.php';
     ```
+
+4. Register the command for early WP-CLI bootstrap.
+    ```sh
+    vi wp-cli.yml
+    ```
+    ```yaml
+    require:
+      - wp-content/mu-plugins/wp-cli-db-export-clean.php
+    ```
+
 
 = Requirements =
 

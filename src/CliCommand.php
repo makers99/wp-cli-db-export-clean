@@ -46,6 +46,7 @@ class CliCommand extends \WP_CLI_Command {
    *
    * @subcommand export-clean
    * @synopsis [<file>]
+   * @when after_wp_load
    */
   public function __invoke(array $args, array $options) {
     global $wpdb;

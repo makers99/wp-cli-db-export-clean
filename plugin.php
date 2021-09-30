@@ -17,13 +17,8 @@ namespace Makers99\WpDbExportClean;
 
 use \WP_CLI;
 
-if (!defined('ABSPATH')) {
-  header($_SERVER['SERVER_PROTOCOL'] . ' 404 Not Found');
-  exit;
-}
-
 include_once __DIR__ . '/vendor/autoload.php';
 
-add_action('cli_init', function () {
+if (is_callable('WP_CLI::add_command')) {
   WP_CLI::add_command('db export-clean', __NAMESPACE__ . '\CliCommand');
-});
+}
