@@ -19,6 +19,28 @@ The command accepts the result filename as argument. If omitted, it defaults to
 
 == Installation ==
 
+= Install as Git submodule =
+
+1. Add the package as submodule.
+    ```sh
+    git submodule add --name wp-cli-db-export-clean git@github.com:makers99/wp-cli-db-export-clean.git .wp-cli/packages/db-export-clean
+    ```
+
+2. Register the command for early WP-CLI bootstrap.
+    ```sh
+    echo -e "require:\n  - .wp-cli/packages/db-export-clean/package.php" >> .wp-cli.yml
+    ```
+    Or manually:
+    ```sh
+    vi wp-cli.yml
+    ```
+    ```yaml
+    require:
+      - vendor/makers99/wp-cli-db-export-clean/package.php
+    ```
+
+= Install with Composer =
+
 1. Install the package with Composer.
     ```sh
     composer config repositories.wp-cli-db-export-clean git https://github.com/makers99/wp-cli-db-export-clean.git
