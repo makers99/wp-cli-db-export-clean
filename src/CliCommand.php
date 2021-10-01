@@ -83,7 +83,7 @@ class CliCommand extends \WP_CLI_Command {
     }
 
     try {
-      $dump = new IMysqldump('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASSWORD);
+      $dump = new IMysqldump('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASSWORD, ['add-drop-table' => TRUE]);
       $tableWheres = apply_filters(static::PREFIX . '/table-wheres', [
         "{$wpdb->prefix}users" => "ID IN ({$allowedUserIds})",
         "{$wpdb->prefix}usermeta" => "user_id IN ({$allowedUserIds})",
