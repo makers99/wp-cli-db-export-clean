@@ -28,7 +28,7 @@ The command accepts the result filename as argument. If omitted, it defaults to
 
 2. Register the command for early WP-CLI bootstrap.
     ```sh
-    echo -e "require:\n  - .wp-cli/packages/db-export-clean/package.php" >> .wp-cli.yml
+    echo -e "require:\n  - .wp-cli/packages/db-export-clean/package.php" >> wp-cli.yml
     ```
     Or manually:
     ```sh
@@ -36,7 +36,7 @@ The command accepts the result filename as argument. If omitted, it defaults to
     ```
     ```yaml
     require:
-      - vendor/makers99/wp-cli-db-export-clean/package.php
+      - .wp-cli/packages/db-export-clean/plugin.php
     ```
 
 = Install with Composer =
@@ -51,7 +51,7 @@ The command accepts the result filename as argument. If omitted, it defaults to
 
 2. Register the command for early WP-CLI bootstrap.
     ```sh
-    echo -e "require:\n  - vendor/makers99/wp-cli-db-export-clean/package.php" >> .wp-cli.yml
+    echo -e "require:\n  - vendor/makers99/wp-cli-db-export-clean/package.php" >> wp-cli.yml
     ```
     Or manually:
     ```sh
