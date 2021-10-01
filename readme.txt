@@ -19,45 +19,47 @@ The command accepts the result filename as argument. If omitted, it defaults to
 
 == Installation ==
 
-This is meant to be used as a must-use plugin, installation the steps are:
+= Install as Git submodule =
 
-1. Create a folder for must-use plugins.
+1. Add the package as submodule.
     ```sh
-    mkdir -p wp-content/mu-plugins
+    git submodule add --name wp-cli-db-export-clean git@github.com:makers99/wp-cli-db-export-clean.git .wp-cli/packages/db-export-clean
     ```
 
-2. CloneClone this repository as a Git submodule.
+2. Register the command for early WP-CLI bootstrap.
     ```sh
-    git submodule add --name wp-cli-db-export-clean git@github.com:makers99/wp-cli-db-export-clean.git wp-content/mu-plugins/wp-cli-db-export-clean
+    echo -e "require:\n  - .wp-cli/packages/db-export-clean/package.php" >> wp-cli.yml
     ```
-
-3. Create the main mu-plugin file and ensure cloned plugin is available.
-    ```sh
-    vi wp-content/mu-plugins/wp-cli-db-export-clean.php
-    ```
-    ```php
-    <?php
-
-    /*
-      Plugin Name: wp db export-clean
-      Description: Adds WP-CLI command `wp db export-clean` to produce a database dump without sensitive data.
-      Version: 1.0.0
-      Author: makers99
-      Author URI: https://makers99.com/
-      License: GPL-2.0+
-      License URI: http://www.gnu.org/licenses/gpl-2.0
-    */
-
-    include_once __DIR__ . '/wp-cli-db-export-clean/plugin.php';
-    ```
-
-4. Register the command for early WP-CLI bootstrap.
+    Or manually:
     ```sh
     vi wp-cli.yml
     ```
     ```yaml
     require:
-      - wp-content/mu-plugins/wp-cli-db-export-clean.php
+      - .wp-cli/packages/db-export-clean/plugin.php
+    ```
+
+= Install with Composer =
+
+1. Install the package with Composer.
+    ```sh
+    composer config repositories.wp-cli-db-export-clean git https://github.com/makers99/wp-cli-db-export-clean.git
+    composer require makers99/wp-cli-db-export-clean:dev-fix/package-install-sun
+    ```
+    Note: Do not use `--dev` to install as `require-dev`, because export-clean
+    is typically used in production.
+
+2. Register the command for early WP-CLI bootstrap.
+    ```sh
+    echo -e "require:\n  - vendor/makers99/wp-cli-db-export-clean/package.php" >> wp-cli.yml
+    ```
+    Or manually:
+    ```sh
+    vi wp-cli.yml
+    ```
+    ```yaml
+    require:
+      - vendor/makers99/wp-cli-db-export-clean/package.php
     ```
 
 
