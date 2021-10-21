@@ -44,7 +44,7 @@ The command accepts the result filename as argument. If omitted, it defaults to
 1. Install the package with Composer.
     ```sh
     composer config repositories.wp-cli-db-export-clean git https://github.com/makers99/wp-cli-db-export-clean.git
-    composer require makers99/wp-cli-db-export-clean:dev-fix/package-install-sun
+    composer require makers99/wp-cli-db-export-clean:dev-master
     ```
     Note: Do not use `--dev` to install as `require-dev`, because export-clean
     is typically used in production.
