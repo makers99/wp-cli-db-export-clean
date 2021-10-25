@@ -110,7 +110,7 @@ class CliCommand extends \WP_CLI_Command {
         "{$wpdb->prefix}woocommerce_sessions" => 'session_id = 0',
       ]);
 
-      // Remove Gravity Forms related entries.
+      // Remove gravityforms related entries.
       if (is_plugin_active('gravityforms/gravityforms.php')) {
         $tableWheres = array_merge($tableWheres, [
           "{$wpdb->prefix}gf_entry" => 'id = 0',
@@ -154,7 +154,7 @@ class CliCommand extends \WP_CLI_Command {
         ]);
       }
 
-      // Remove Yoast related entries.
+      // Remove wordpress-seo (Yoast) related entries.
       if (is_plugin_active('wordpress-seo/wp-seo.php')) {
         $tableWheres = array_merge($tableWheres, [
           "{$wpdb->prefix}yoast_indexable" => 'id = 0',
