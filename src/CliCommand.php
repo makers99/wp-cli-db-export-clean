@@ -69,17 +69,24 @@ class CliCommand extends \WP_CLI_Command {
     )));
     $allowedUserIds = apply_filters(static::PREFIX . '/allowed-user-ids', $allowedUserIds);
 
-    $allowedPostIds = implode(',', $wpdb->get_col($d = "
+    // Retain only order/subscription IDs corresponding to allowed users.
+    $allowedOrderIds = implode(',', $wpdb->get_col("
       SELECT p.ID FROM {$wpdb->prefix}posts p
         JOIN {$wpdb->prefix}postmeta pm ON pm.post_id = p.ID
         WHERE p.post_type IN (\"shop_order\", \"shop_subscription\")
           AND pm.meta_key = '_customer_user'
           AND pm.meta_value IN ({$allowedUserIds})
     "));
+    $allowedOrderIds = apply_filters(static::PREFIX . '/allowed-order-ids', $allowedOrderIds);
 
-    $postTableWheres = ['post_type NOT IN ("revision")'];
-    if ($allowedPostIds) {
-      $postTableWheres[] = '(post_type NOT IN ("shop_order", "shop_subscription") OR ID IN (' . $allowedPostIds . '))';
+    $allowedOrderItemIds = !$allowedOrderIds ? '' : implode(',', $wpdb->get_col("
+      SELECT oi.order_item_id FROM {$wpdb->prefix}woocommerce_order_items oi
+        WHERE oi.order_id IN ({$allowedOrderIds})
+    "));
+
+    $postTableWheres = ['post_type NOT IN ("revision", "customize_changeset", "oembed_cache")'];
+    if ($allowedOrderIds) {
+      $postTableWheres[] = '(post_type NOT IN ("shop_order", "shop_subscription") OR ID IN (' . $allowedOrderIds . '))';
     }
 
     try {
@@ -87,13 +94,63 @@ class CliCommand extends \WP_CLI_Command {
         'add-drop-table' => TRUE,
       ]);
       $tableWheres = apply_filters(static::PREFIX . '/table-wheres', [
+        "{$wpdb->prefix}comments" => "comment_post_ID IN ({$allowedOrderIds})",
         "{$wpdb->prefix}users" => "ID IN ({$allowedUserIds})",
         "{$wpdb->prefix}usermeta" => "user_id IN ({$allowedUserIds})",
+        "{$wpdb->prefix}options" => 'option_name NOT LIKE "_transient_%" AND option_name NOT LIKE "_cache_%"',
         "{$wpdb->prefix}posts" => implode(' AND ', $postTableWheres),
-        "{$wpdb->prefix}postmeta" => "post_id NOT IN (SELECT p.ID FROM {$wpdb->prefix}posts p WHERE p.post_type IN (\"revision\", \"shop_order\", \"shop_subscription\"))",
-        // Ignore all sessions.
-        "{$wpdb->prefix}woocommerce_sessions" => 'session_id = 0',
+        "{$wpdb->prefix}postmeta" => "post_id NOT IN (SELECT p.ID FROM {$wpdb->prefix}posts p WHERE " . implode(' AND ', $postTableWheres) . ")",
       ]);
+
+      // Remove woocommerce related entries.
+      $tableWheres = array_merge($tableWheres, [
+        "{$wpdb->prefix}actionscheduler_actions" => '1 = 0',
+        "{$wpdb->prefix}actionscheduler_claims" => '1 = 0',
+        "{$wpdb->prefix}actionscheduler_groups" => '1 = 0',
+        "{$wpdb->prefix}actionscheduler_logs" => '1 = 0',
+        "{$wpdb->prefix}woocommerce_order_items" => "order_id IN ({$allowedOrderIds})",
+        "{$wpdb->prefix}woocommerce_order_itemmeta" => "order_item_id IN ({$allowedOrderItemIds})",
+        "{$wpdb->prefix}woocommerce_sessions" => '1 = 0',
+      ]);
+
+      // Remove gravityforms related entries.
+      $tableWheres = array_merge($tableWheres, [
+        "{$wpdb->prefix}gf_entry" => '1 = 0',
+        "{$wpdb->prefix}gf_entry_meta" => '1 = 0',
+        "{$wpdb->prefix}gf_entry_notes" => '1 = 0',
+        "{$wpdb->prefix}gf_form_revisions" => '1 = 0',
+        "{$wpdb->prefix}gf_form_view" => '1 = 0',
+      ]);
+
+      // Remove wp-lister-amazon related entries.
+      $tableWheres = array_merge($tableWheres, [
+        "{$wpdb->prefix}amazon_feeds" => '1 = 0',
+        "{$wpdb->prefix}amazon_jobs" => '1 = 0',
+        "{$wpdb->prefix}amazon_log" => '1 = 0',
+        "{$wpdb->prefix}amazon_orders" => "buyer_userid IN ({$allowedUserIds})",
+        "{$wpdb->prefix}amazon_reports" => '1 = 0',
+        "{$wpdb->prefix}amazon_stock_log" => '1 = 0',
+      ]);
+
+      // Remove wp-lister-ebay related entries.
+      $tableWheres = array_merge($tableWheres, [
+        "{$wpdb->prefix}ebay_jobs" => '1 = 0',
+        "{$wpdb->prefix}ebay_log" => '1 = 0',
+        "{$wpdb->prefix}ebay_messages" => '1 = 0',
+        "{$wpdb->prefix}ebay_orders" => "buyer_userid IN ({$allowedUserIds})",
+        "{$wpdb->prefix}ebay_stocks_log" => '1 = 0',
+        "{$wpdb->prefix}ebay_transactions" => "buyer_userid IN ({$allowedUserIds})",
+      ]);
+
+      // Remove wordpress-seo (Yoast) related entries.
+      $tableWheres = array_merge($tableWheres, [
+        "{$wpdb->prefix}yoast_indexable" => '1 = 0',
+        "{$wpdb->prefix}yoast_indexable_hierarchy" => '1 = 0',
+        "{$wpdb->prefix}yoast_migrations" => '1 = 0',
+        "{$wpdb->prefix}yoast_seo_links" => '1 = 0',
+        "{$wpdb->prefix}yoast_seo_meta" => '1 = 0',
+      ]);
+
       $dump->setTableWheres($tableWheres);
 
       // Set target options containing credentials to be emptied before dump.
