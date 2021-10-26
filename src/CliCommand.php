@@ -124,16 +124,10 @@ class CliCommand extends \WP_CLI_Command {
       // Remove wp-lister-amazon related entries.
       if (is_plugin_active('wp-lister-amazon/wp-lister-amazon.php')) {
         $tableWheres = array_merge($tableWheres, [
-          "{$wpdb->prefix}amazon_accounts" => '1 = 0',
-          "{$wpdb->prefix}amazon_feed_templates" => '1 = 0',
-          "{$wpdb->prefix}amazon_feed_tpl_data" => '1 = 0',
-          "{$wpdb->prefix}amazon_feed_tpl_values" => '1 = 0',
           "{$wpdb->prefix}amazon_feeds" => '1 = 0',
           "{$wpdb->prefix}amazon_jobs" => '1 = 0',
           "{$wpdb->prefix}amazon_log" => '1 = 0',
-          "{$wpdb->prefix}amazon_listings" => '1 = 0',
           "{$wpdb->prefix}amazon_orders" => "buyer_userid IN ({$allowedUserIds})",
-          "{$wpdb->prefix}amazon_payments" => "buyer_userid IN ({$allowedUserIds})",
           "{$wpdb->prefix}amazon_reports" => '1 = 0',
           "{$wpdb->prefix}amazon_stock_log" => '1 = 0',
         ]);
@@ -142,15 +136,12 @@ class CliCommand extends \WP_CLI_Command {
       // Remove wp-lister-ebay related entries.
       if (is_plugin_active('wp-lister-ebay/wp-lister-ebay.php')) {
         $tableWheres = array_merge($tableWheres, [
-          "{$wpdb->prefix}ebay_accounts" => '1 = 0',
-          "{$wpdb->prefix}ebay_auctions" => '1 = 0',
-          "{$wpdb->prefix}ebay_categories" => '1 = 0',
           "{$wpdb->prefix}ebay_jobs" => '1 = 0',
           "{$wpdb->prefix}ebay_log" => '1 = 0',
           "{$wpdb->prefix}ebay_messages" => '1 = 0',
           "{$wpdb->prefix}ebay_orders" => "buyer_userid IN ({$allowedUserIds})",
-          "{$wpdb->prefix}ebay_shipping" => '1 = 0',
-          "{$wpdb->prefix}ebay_store_categories" => '1 = 0',
+          "{$wpdb->prefix}wp_ebay_stocks_log" => '1 = 0',
+          "{$wpdb->prefix}wp_ebay_transactions" => "buyer_userid IN ({$allowedUserIds})",
         ]);
       }
 
@@ -160,7 +151,6 @@ class CliCommand extends \WP_CLI_Command {
           "{$wpdb->prefix}yoast_indexable" => '1 = 0',
           "{$wpdb->prefix}yoast_indexable_hierarchy" => '1 = 0',
           "{$wpdb->prefix}yoast_migrations" => '1 = 0',
-          "{$wpdb->prefix}yoast_primary_term" => '1 = 0',
           "{$wpdb->prefix}yoast_seo_links" => '1 = 0',
           "{$wpdb->prefix}yoast_seo_meta" => '1 = 0',
         ]);
