@@ -94,19 +94,22 @@ class CliCommand extends \WP_CLI_Command {
         'add-drop-table' => TRUE,
       ]);
       $tableWheres = apply_filters(static::PREFIX . '/table-wheres', [
+        "{$wpdb->prefix}comments" => "comment_post_ID IN ({$allowedOrderIds})",
         "{$wpdb->prefix}users" => "ID IN ({$allowedUserIds})",
         "{$wpdb->prefix}usermeta" => "user_id IN ({$allowedUserIds})",
-        "{$wpdb->prefix}woocommerce_order_items" => "order_id IN ({$allowedOrderIds})",
-        "{$wpdb->prefix}woocommerce_order_itemmeta" => "order_item_id IN ({$allowedOrderItemIds})",
+        "{$wpdb->prefix}options" => 'option_name NOT LIKE "_transient_%" AND option_name NOT LIKE "_cache_%"',
         "{$wpdb->prefix}posts" => implode(' AND ', $postTableWheres),
         "{$wpdb->prefix}postmeta" => "post_id NOT IN (SELECT p.ID FROM {$wpdb->prefix}posts p WHERE " . implode(' AND ', $postTableWheres) . ")",
-        // Ignore unnnecessary info.
+      ]);
+
+      // Remove woocommerce related entries.
+      $tableWheres = array_merge($tableWheres, [
         "{$wpdb->prefix}actionscheduler_actions" => '1 = 0',
         "{$wpdb->prefix}actionscheduler_claims" => '1 = 0',
         "{$wpdb->prefix}actionscheduler_groups" => '1 = 0',
         "{$wpdb->prefix}actionscheduler_logs" => '1 = 0',
-        "{$wpdb->prefix}comments" => "comment_post_ID IN ({$allowedOrderIds})",
-        "{$wpdb->prefix}options" => 'option_name NOT LIKE "_transient_%" AND option_name NOT LIKE "_cache_%"',
+        "{$wpdb->prefix}woocommerce_order_items" => "order_id IN ({$allowedOrderIds})",
+        "{$wpdb->prefix}woocommerce_order_itemmeta" => "order_item_id IN ({$allowedOrderItemIds})",
         "{$wpdb->prefix}woocommerce_sessions" => '1 = 0',
       ]);
 
