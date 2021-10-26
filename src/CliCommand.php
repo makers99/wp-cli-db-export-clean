@@ -105,8 +105,8 @@ class CliCommand extends \WP_CLI_Command {
         "{$wpdb->prefix}actionscheduler_claims" => 'claim_id = 0',
         "{$wpdb->prefix}actionscheduler_groups" => 'group_id = 0',
         "{$wpdb->prefix}actionscheduler_logs" => 'log_id = 0',
-        "{$wpdb->prefix}comments" => "comment_post_ID NOT IN ({$allowedOrderIds})",
-        "{$wpdb->prefix}options" => 'option_name NOT LIKE "%_transient_%" AND option_name NOT LIKE "%cache%"',
+        "{$wpdb->prefix}comments" => "comment_post_ID IN ({$allowedOrderIds})",
+        "{$wpdb->prefix}options" => 'option_name NOT LIKE "_transient_%" AND option_name NOT LIKE "_cache_%"',
         "{$wpdb->prefix}woocommerce_sessions" => 'session_id = 0',
       ]);
 
