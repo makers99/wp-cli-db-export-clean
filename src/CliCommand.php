@@ -70,7 +70,7 @@ class CliCommand extends \WP_CLI_Command {
     $allowedUserIds = apply_filters(static::PREFIX . '/allowed-user-ids', $allowedUserIds);
 
     // Retain only order/subscription ids corresponding to allowed users.
-    $allowedOrderIds = implode(',', $wpdb->get_col($d = "
+    $allowedOrderIds = implode(',', $wpdb->get_col("
       SELECT p.ID FROM {$wpdb->prefix}posts p
         JOIN {$wpdb->prefix}postmeta pm ON pm.post_id = p.ID
         WHERE p.post_type IN (\"shop_order\", \"shop_subscription\")
@@ -79,7 +79,7 @@ class CliCommand extends \WP_CLI_Command {
     "));
     $allowedOrderIds = apply_filters(static::PREFIX . '/allowed-order-ids', $allowedOrderIds);
 
-    $allowedOrderItemIds = implode(',', $wpdb->get_col($d = "
+    $allowedOrderItemIds = implode(',', $wpdb->get_col("
       SELECT oi.order_item_id FROM {$wpdb->prefix}woocommerce_order_items oi
         WHERE oi.order_id IN ({$allowedOrderIds})
     "));
@@ -99,7 +99,7 @@ class CliCommand extends \WP_CLI_Command {
         "{$wpdb->prefix}woocommerce_order_items" => "order_id IN ({$allowedOrderIds})",
         "{$wpdb->prefix}woocommerce_order_itemmeta" => "order_item_id IN ({$allowedOrderItemIds})",
         "{$wpdb->prefix}posts" => implode(' AND ', $postTableWheres),
-        "{$wpdb->prefix}postmeta" => "post_id NOT IN (SELECT p.ID FROM {$wpdb->prefix}posts p WHERE p.post_type IN (\"revision\", \"shop_order\", \"shop_subscription\"))",
+        "{$wpdb->prefix}postmeta" => "post_id NOT IN (SELECT p.ID FROM {$wpdb->prefix}posts p WHERE " . implode(' AND ', $postTableWheres) . ")",
         // Ignore unnnecessary info.
         "{$wpdb->prefix}actionscheduler_actions" => '1 = 0',
         "{$wpdb->prefix}actionscheduler_claims" => '1 = 0',
@@ -111,50 +111,42 @@ class CliCommand extends \WP_CLI_Command {
       ]);
 
       // Remove gravityforms related entries.
-      if (is_plugin_active('gravityforms/gravityforms.php')) {
-        $tableWheres = array_merge($tableWheres, [
-          "{$wpdb->prefix}gf_entry" => '1 = 0',
-          "{$wpdb->prefix}gf_entry_meta" => '1 = 0',
-          "{$wpdb->prefix}gf_entry_notes" => '1 = 0',
-          "{$wpdb->prefix}gf_form_revisions" => '1 = 0',
-          "{$wpdb->prefix}gf_form_view" => '1 = 0',
-        ]);
-      }
+      $tableWheres = array_merge($tableWheres, [
+        "{$wpdb->prefix}gf_entry" => '1 = 0',
+        "{$wpdb->prefix}gf_entry_meta" => '1 = 0',
+        "{$wpdb->prefix}gf_entry_notes" => '1 = 0',
+        "{$wpdb->prefix}gf_form_revisions" => '1 = 0',
+        "{$wpdb->prefix}gf_form_view" => '1 = 0',
+      ]);
 
       // Remove wp-lister-amazon related entries.
-      if (is_plugin_active('wp-lister-amazon/wp-lister-amazon.php')) {
-        $tableWheres = array_merge($tableWheres, [
-          "{$wpdb->prefix}amazon_feeds" => '1 = 0',
-          "{$wpdb->prefix}amazon_jobs" => '1 = 0',
-          "{$wpdb->prefix}amazon_log" => '1 = 0',
-          "{$wpdb->prefix}amazon_orders" => "buyer_userid IN ({$allowedUserIds})",
-          "{$wpdb->prefix}amazon_reports" => '1 = 0',
-          "{$wpdb->prefix}amazon_stock_log" => '1 = 0',
-        ]);
-      }
+      $tableWheres = array_merge($tableWheres, [
+        "{$wpdb->prefix}amazon_feeds" => '1 = 0',
+        "{$wpdb->prefix}amazon_jobs" => '1 = 0',
+        "{$wpdb->prefix}amazon_log" => '1 = 0',
+        "{$wpdb->prefix}amazon_orders" => "buyer_userid IN ({$allowedUserIds})",
+        "{$wpdb->prefix}amazon_reports" => '1 = 0',
+        "{$wpdb->prefix}amazon_stock_log" => '1 = 0',
+      ]);
 
       // Remove wp-lister-ebay related entries.
-      if (is_plugin_active('wp-lister-ebay/wp-lister-ebay.php')) {
-        $tableWheres = array_merge($tableWheres, [
-          "{$wpdb->prefix}ebay_jobs" => '1 = 0',
-          "{$wpdb->prefix}ebay_log" => '1 = 0',
-          "{$wpdb->prefix}ebay_messages" => '1 = 0',
-          "{$wpdb->prefix}ebay_orders" => "buyer_userid IN ({$allowedUserIds})",
-          "{$wpdb->prefix}wp_ebay_stocks_log" => '1 = 0',
-          "{$wpdb->prefix}wp_ebay_transactions" => "buyer_userid IN ({$allowedUserIds})",
-        ]);
-      }
+      $tableWheres = array_merge($tableWheres, [
+        "{$wpdb->prefix}ebay_jobs" => '1 = 0',
+        "{$wpdb->prefix}ebay_log" => '1 = 0',
+        "{$wpdb->prefix}ebay_messages" => '1 = 0',
+        "{$wpdb->prefix}ebay_orders" => "buyer_userid IN ({$allowedUserIds})",
+        "{$wpdb->prefix}wp_ebay_stocks_log" => '1 = 0',
+        "{$wpdb->prefix}wp_ebay_transactions" => "buyer_userid IN ({$allowedUserIds})",
+      ]);
 
       // Remove wordpress-seo (Yoast) related entries.
-      if (is_plugin_active('wordpress-seo/wp-seo.php')) {
-        $tableWheres = array_merge($tableWheres, [
-          "{$wpdb->prefix}yoast_indexable" => '1 = 0',
-          "{$wpdb->prefix}yoast_indexable_hierarchy" => '1 = 0',
-          "{$wpdb->prefix}yoast_migrations" => '1 = 0',
-          "{$wpdb->prefix}yoast_seo_links" => '1 = 0',
-          "{$wpdb->prefix}yoast_seo_meta" => '1 = 0',
-        ]);
-      }
+      $tableWheres = array_merge($tableWheres, [
+        "{$wpdb->prefix}yoast_indexable" => '1 = 0',
+        "{$wpdb->prefix}yoast_indexable_hierarchy" => '1 = 0',
+        "{$wpdb->prefix}yoast_migrations" => '1 = 0',
+        "{$wpdb->prefix}yoast_seo_links" => '1 = 0',
+        "{$wpdb->prefix}yoast_seo_meta" => '1 = 0',
+      ]);
 
       $dump->setTableWheres($tableWheres);
 
