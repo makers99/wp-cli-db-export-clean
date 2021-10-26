@@ -69,7 +69,7 @@ class CliCommand extends \WP_CLI_Command {
     )));
     $allowedUserIds = apply_filters(static::PREFIX . '/allowed-user-ids', $allowedUserIds);
 
-    // Retain only order/subscription ids corresponding to allowed users.
+    // Retain only order/subscription IDs corresponding to allowed users.
     $allowedOrderIds = implode(',', $wpdb->get_col("
       SELECT p.ID FROM {$wpdb->prefix}posts p
         JOIN {$wpdb->prefix}postmeta pm ON pm.post_id = p.ID
@@ -79,7 +79,7 @@ class CliCommand extends \WP_CLI_Command {
     "));
     $allowedOrderIds = apply_filters(static::PREFIX . '/allowed-order-ids', $allowedOrderIds);
 
-    $allowedOrderItemIds = implode(',', $wpdb->get_col("
+    $allowedOrderItemIds = !$allowedOrderIds ? '' : implode(',', $wpdb->get_col("
       SELECT oi.order_item_id FROM {$wpdb->prefix}woocommerce_order_items oi
         WHERE oi.order_id IN ({$allowedOrderIds})
     "));
@@ -135,8 +135,8 @@ class CliCommand extends \WP_CLI_Command {
         "{$wpdb->prefix}ebay_log" => '1 = 0',
         "{$wpdb->prefix}ebay_messages" => '1 = 0',
         "{$wpdb->prefix}ebay_orders" => "buyer_userid IN ({$allowedUserIds})",
-        "{$wpdb->prefix}wp_ebay_stocks_log" => '1 = 0',
-        "{$wpdb->prefix}wp_ebay_transactions" => "buyer_userid IN ({$allowedUserIds})",
+        "{$wpdb->prefix}ebay_stocks_log" => '1 = 0',
+        "{$wpdb->prefix}ebay_transactions" => "buyer_userid IN ({$allowedUserIds})",
       ]);
 
       // Remove wordpress-seo (Yoast) related entries.
