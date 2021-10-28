@@ -45,15 +45,19 @@ class CliCommand extends \WP_CLI_Command {
    * Exports the database to a file without sensitive data.
    *
    * @subcommand export-clean
-   * @synopsis [<file>]
+   * @synopsis [<file>] [--remove-keys]
    * @when after_wp_load
    */
   public function __invoke(array $args, array $options) {
     global $wpdb;
 
+    $options += [
+      'remove-keys' => FALSE,
+    ];
+
     // Set allowed email hosts.
     $adminsEmails = array_map(function ($user) {
-      return reset($user);
+      return $user->user_email;
     }, get_users([
       'fields' => ['user_email'],
       'role__in' => ['administrator'],
@@ -151,16 +155,24 @@ class CliCommand extends \WP_CLI_Command {
         "{$wpdb->prefix}yoast_seo_meta" => '1 = 0',
       ]);
 
-      $dump->setTableWheres($tableWheres);
+      // Remove options containing license keys and API credentials during dump.
+      if ($options['remove-keys']) {
+        $removeOptions = apply_filters(static::PREFIX . '/dispose-options', static::DISPOSE_OPTIONS);
+        $dump->setTransformTableRowHook(function ($tableName, array $row) use ($removeOptions, $wpdb) {
+          if ($tableName === "{$wpdb->prefix}options" && isset($row['meta_key']) && in_array($row['meta_key'], $removeOptions, TRUE)) {
+            $row['meta_vaue'] = '';
+          }
+          return $row;
+        });
 
-      // Set target options containing credentials to be emptied before dump.
-      $optionsToBlank = apply_filters(static::PREFIX . '/dispose-options', static::DISPOSE_OPTIONS);
-      $dump->setTransformTableRowHook(function ($tableName, array $row) use ($optionsToBlank, $wpdb) {
-        if ($tableName === "{$wpdb->prefix}options" && isset($row['meta_key']) && in_array($row['meta_key'], $optionsToBlank)) {
-          $row['meta_vaue'] = '';
-        }
-        return $row;
-      });
+        // Remove wp-lister-amazon and wp-lister-ebay profiles.
+        $tableWheres = array_merge($tableWheres, [
+          "{$wpdb->prefix}amazon_accounts" => '1 = 0',
+          "{$wpdb->prefix}ebay_accounts" => '1 = 0',
+        ]);
+      }
+
+      $dump->setTableWheres($tableWheres);
 
       $progress = Utils\make_progress_bar('Dumping tables: ', $databaseTableCount);
 
