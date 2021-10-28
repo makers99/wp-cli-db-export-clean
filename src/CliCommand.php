@@ -99,7 +99,7 @@ class CliCommand extends \WP_CLI_Command {
         "{$wpdb->prefix}usermeta" => "user_id IN ({$allowedUserIds})",
         "{$wpdb->prefix}options" => 'option_name NOT LIKE "_transient_%" AND option_name NOT LIKE "_cache_%"',
         "{$wpdb->prefix}posts" => implode(' AND ', $postTableWheres),
-        "{$wpdb->prefix}postmeta" => "post_id NOT IN (SELECT p.ID FROM {$wpdb->prefix}posts p WHERE " . implode(' AND ', $postTableWheres) . ")",
+        "{$wpdb->prefix}postmeta" => "post_id IN (SELECT p.ID FROM {$wpdb->prefix}posts p WHERE " . implode(' AND ', $postTableWheres) . ")",
       ]);
 
       // Remove woocommerce related entries.
