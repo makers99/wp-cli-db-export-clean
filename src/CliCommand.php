@@ -97,10 +97,19 @@ class CliCommand extends \WP_CLI_Command {
       $dump = new IMysqldump('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASSWORD, [
         'add-drop-table' => TRUE,
       ]);
-      $tableWheres = apply_filters(static::PREFIX . '/table-wheres', [
-        "{$wpdb->prefix}comments" => "comment_post_ID IN ({$allowedOrderIds})",
-        "{$wpdb->prefix}users" => "ID IN ({$allowedUserIds})",
-        "{$wpdb->prefix}usermeta" => "user_id IN ({$allowedUserIds})",
+
+      if ($allowedUserIds) {
+        $tableWheres["{$wpdb->prefix}users"] = "ID IN ({$allowedUserIds})";
+        $tableWheres["{$wpdb->prefix}usermeta"] = "user_id IN ({$allowedUserIds})";
+      }
+      if ($allowedOrderIds) {
+        $tableWheres["{$wpdb->prefix}comments"] = "comment_post_ID IN ({$allowedOrderIds})";
+        $tableWheres["{$wpdb->prefix}woocommerce_order_items"] = "order_id IN ({$allowedOrderIds})";
+      }
+      if ($allowedOrderItemIds) {
+        $tableWheres["{$wpdb->prefix}woocommerce_order_itemmeta"] = "order_item_id IN ({$allowedOrderItemIds})";
+      }
+      $tableWheres = array_merge($tableWheres, [
         "{$wpdb->prefix}options" => 'option_name NOT LIKE "_transient_%" AND option_name NOT LIKE "_cache_%"',
         "{$wpdb->prefix}posts" => implode(' AND ', $postTableWheres),
         "{$wpdb->prefix}postmeta" => "post_id IN (SELECT p.ID FROM {$wpdb->prefix}posts p WHERE " . implode(' AND ', $postTableWheres) . ")",
@@ -112,8 +121,6 @@ class CliCommand extends \WP_CLI_Command {
         "{$wpdb->prefix}actionscheduler_claims" => '1 = 0',
         "{$wpdb->prefix}actionscheduler_groups" => '1 = 0',
         "{$wpdb->prefix}actionscheduler_logs" => '1 = 0',
-        "{$wpdb->prefix}woocommerce_order_items" => "order_id IN ({$allowedOrderIds})",
-        "{$wpdb->prefix}woocommerce_order_itemmeta" => "order_item_id IN ({$allowedOrderItemIds})",
         "{$wpdb->prefix}woocommerce_sessions" => '1 = 0',
       ]);
 
@@ -155,6 +162,9 @@ class CliCommand extends \WP_CLI_Command {
         "{$wpdb->prefix}yoast_seo_meta" => '1 = 0',
       ]);
 
+      // Allow customisation for where conditions.
+      $tableWheres = apply_filters(static::PREFIX . '/table-wheres', $tableWheres);
+
       // Remove options containing license keys and API credentials during dump.
       if ($options['remove-keys']) {
         $removeOptions = apply_filters(static::PREFIX . '/dispose-options', static::DISPOSE_OPTIONS);
@@ -184,8 +194,8 @@ class CliCommand extends \WP_CLI_Command {
       });
 
       $file = $args[0] ?? 'clean.sql';
-      $dump->start($file);
 
+      $dump->start($file);
       $progress->finish();
 
       WP_CLI::success('Exported clean database dump into ' . $file);
