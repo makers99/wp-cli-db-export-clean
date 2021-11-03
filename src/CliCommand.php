@@ -72,6 +72,9 @@ class CliCommand extends \WP_CLI_Command {
       $wpdb->prepare("SELECT u.ID FROM {$wpdb->prefix}users u WHERE u.user_email REGEXP ('%s')", implode('|', $allowedEmails)
     )));
     $allowedUserIds = apply_filters(static::PREFIX . '/allowed-user-ids', $allowedUserIds);
+    if (empty($allowedUserIds)) {
+      WP_CLI::warning("The list of users with role 'administrator' appears to be empty. The dump will probably not yield a functional system. Please verify the user roles.");
+    }
 
     // Retain only order/subscription IDs corresponding to allowed users.
     $allowedOrderIds = implode(',', $wpdb->get_col("
