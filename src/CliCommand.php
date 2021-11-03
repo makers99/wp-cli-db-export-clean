@@ -162,9 +162,6 @@ class CliCommand extends \WP_CLI_Command {
         "{$wpdb->prefix}yoast_seo_meta" => '1 = 0',
       ]);
 
-      // Allow customisation for where conditions.
-      $tableWheres = apply_filters(static::PREFIX . '/table-wheres', $tableWheres);
-
       // Remove options containing license keys and API credentials during dump.
       if ($options['remove-keys']) {
         $removeOptions = apply_filters(static::PREFIX . '/dispose-options', static::DISPOSE_OPTIONS);
@@ -181,6 +178,9 @@ class CliCommand extends \WP_CLI_Command {
           "{$wpdb->prefix}ebay_accounts" => '1 = 0',
         ]);
       }
+
+      // Allow site-specific customisations for export conditions.
+      $tableWheres = apply_filters(static::PREFIX . '/table-wheres', $tableWheres);
 
       $dump->setTableWheres($tableWheres);
 
