@@ -102,13 +102,6 @@ class CliCommand extends \WP_CLI_Command {
         $tableWheres["{$wpdb->prefix}users"] = "ID IN ({$allowedUserIds})";
         $tableWheres["{$wpdb->prefix}usermeta"] = "user_id IN ({$allowedUserIds})";
       }
-      if ($allowedOrderIds) {
-        $tableWheres["{$wpdb->prefix}comments"] = "comment_post_ID IN ({$allowedOrderIds})";
-        $tableWheres["{$wpdb->prefix}woocommerce_order_items"] = "order_id IN ({$allowedOrderIds})";
-      }
-      if ($allowedOrderItemIds) {
-        $tableWheres["{$wpdb->prefix}woocommerce_order_itemmeta"] = "order_item_id IN ({$allowedOrderItemIds})";
-      }
       $tableWheres = array_merge($tableWheres, [
         "{$wpdb->prefix}options" => 'option_name NOT LIKE "_transient_%" AND option_name NOT LIKE "_cache_%"',
         "{$wpdb->prefix}posts" => implode(' AND ', $postTableWheres),
@@ -123,6 +116,13 @@ class CliCommand extends \WP_CLI_Command {
         "{$wpdb->prefix}actionscheduler_logs" => '1 = 0',
         "{$wpdb->prefix}woocommerce_sessions" => '1 = 0',
       ]);
+      if ($allowedOrderIds) {
+        $tableWheres["{$wpdb->prefix}comments"] = "comment_post_ID IN ({$allowedOrderIds})";
+        $tableWheres["{$wpdb->prefix}woocommerce_order_items"] = "order_id IN ({$allowedOrderIds})";
+      }
+      if ($allowedOrderItemIds) {
+        $tableWheres["{$wpdb->prefix}woocommerce_order_itemmeta"] = "order_item_id IN ({$allowedOrderItemIds})";
+      }
 
       // Remove gravityforms related entries.
       $tableWheres = array_merge($tableWheres, [
