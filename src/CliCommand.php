@@ -68,9 +68,10 @@ class CliCommand extends \WP_CLI_Command {
     $databaseTableCount = $wpdb->get_col($wpdb->prepare("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '%s'", DB_NAME))[0];
 
     // Retain user ids about to be skipped for further filters.
+    $emailsPlaceholder = implode(',', array_fill(0, count($allowedEmails), '%s'));
     $allowedUserIds = implode(',', $wpdb->get_col(
-      $wpdb->prepare("SELECT u.ID FROM {$wpdb->prefix}users u WHERE u.user_email REGEXP ('%s')", implode('|', $allowedEmails)
-    )));
+      $wpdb->prepare("SELECT u.ID FROM {$wpdb->prefix}users u WHERE u.user_email IN ({$emailsPlaceholder})", $allowedEmails)
+    ));
     $allowedUserIds = apply_filters(static::PREFIX . '/allowed-user-ids', $allowedUserIds);
 
     // Retain only order/subscription IDs corresponding to allowed users.
