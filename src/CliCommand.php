@@ -72,9 +72,6 @@ class CliCommand extends \WP_CLI_Command {
       $wpdb->prepare("SELECT u.ID FROM {$wpdb->prefix}users u WHERE u.user_email REGEXP ('%s')", implode('|', $allowedEmails)
     )));
     $allowedUserIds = apply_filters(static::PREFIX . '/allowed-user-ids', $allowedUserIds);
-    if (empty($allowedUserIds)) {
-      WP_CLI::warning("The list of users with role 'administrator' appears to be empty. The dump will probably not yield a functional system. Please verify the user roles.");
-    }
 
     // Retain only order/subscription IDs corresponding to allowed users.
     $allowedOrderIds = implode(',', $wpdb->get_col("
@@ -101,15 +98,13 @@ class CliCommand extends \WP_CLI_Command {
         'add-drop-table' => TRUE,
       ]);
 
-      if ($allowedUserIds) {
-        $tableWheres["{$wpdb->prefix}users"] = "ID IN ({$allowedUserIds})";
-        $tableWheres["{$wpdb->prefix}usermeta"] = "user_id IN ({$allowedUserIds})";
-      }
-      $tableWheres = array_merge($tableWheres, [
+      $tableWheres = [
+        "{$wpdb->prefix}users" => "ID IN ({$allowedUserIds})",
+        "{$wpdb->prefix}usermeta" => "user_id IN ({$allowedUserIds})",
         "{$wpdb->prefix}options" => 'option_name NOT LIKE "_transient_%" AND option_name NOT LIKE "_cache_%"',
         "{$wpdb->prefix}posts" => implode(' AND ', $postTableWheres),
         "{$wpdb->prefix}postmeta" => "post_id IN (SELECT p.ID FROM {$wpdb->prefix}posts p WHERE " . implode(' AND ', $postTableWheres) . ")",
-      ]);
+      ];
 
       // Remove woocommerce related entries.
       $tableWheres = array_merge($tableWheres, [
