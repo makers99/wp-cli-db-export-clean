@@ -67,3 +67,27 @@ The command accepts the result filename as argument. If omitted, it defaults to
 
 * PHP 7.4 or later.
 
+## Integration
+
+### Including more users in the database export
+
+The `wp db export-clean` command only includes all users having the role administrator by default. Use the filter hook `'wp-db-export-clean/allowed-emails'` to add more users:
+```php
+add_filter('wp-db-export-clean/allowed-emails', function ($allowed_emails) {
+  global $wpdb;
+  $users = $wpdb->get_col(
+    $wpdb->prepare("SELECT u.user_email FROM {$wpdb->prefix}users u WHERE u.user_email LIKE '%%%s'", '@example.com')
+  );
+  return array_unique(array_merge($allowed_emails, $users));
+});
+```
+
+## Troubleshooting
+
+### MySQL errors during export
+
+Add to `wp-cli.yml` in your site root folder:
+```yml
+db export:
+  max-allowed-packet: 1G
+```
