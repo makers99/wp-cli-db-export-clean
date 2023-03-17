@@ -1,9 +1,21 @@
 {
     "name": "makers99/wp-cli-db-export-clean",
     "type": "wp-cli-package",
-    "description": "Adds WP-CLI command `wp db export-clean` to produce a database dump without sensitive data.",
+    "description": "A WP-CLI command `wp db export-clean` to create a database dump without sensitive customer/user data.",
+    "keywords": ["database", "dump", "deploy", "mysql", "devops", "ci", "privacy", "security", "wp-cli", "wp-cli-command", "wordpress", "woocommerce"],
+    "homepage": "https://github.com/makers99/wp-cli-db-export-clean",
     "license": "GPL-2.0-or-later",
     "authors": [
+        {
+            "name": "Daniel Kudwien",
+            "email": "sun@netzstrategen.com",
+            "homepage": "https://github.com/sun"
+        },
+        {
+            "name": "Bogdan Arizancu",
+            "email": "bogdanarizancu@gmail.com",
+            "homepage": "https://github.com/bogdanarizancu"
+        },
         {
             "name": "makers99",
             "email": "hi@makers99.com",
@@ -11,7 +23,13 @@
         }
     ],
     "require": {
-        "ifsnop/mysqldump-php": "^2.9"
+        "ifsnop/mysqldump-php": "^2.9",
+        "php": ">=7.4"
+    },
+    "extra": {
+        "commands": [
+            "db export-clean"
+        ]
     },
     "autoload": {
         "psr-4": {
