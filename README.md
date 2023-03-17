@@ -124,3 +124,12 @@ Add to `wp-cli.yml` in your site root folder:
 db export:
   max-allowed-packet: 1G
 ```
+
+
+## Come create with us!
+
+Originally authored by [Bogdan Arizancu](https://github.com/bogdanarizancu) and [Daniel Kudwien](https://github.com/sun).
+
+<p align="center">
+<a href="https://makers99.com/#jobs"><img src="https://raw.githubusercontent.com/makers99/makers99/main/assets/makers99-github-banner.png" width="100%"></a>
+</p>
