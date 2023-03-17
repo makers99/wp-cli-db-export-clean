@@ -26,6 +26,11 @@
         "ifsnop/mysqldump-php": "^2.9",
         "php": ">=7.4"
     },
+    "extra": {
+        "commands": [
+            "db export-clean"
+        ]
+    },
     "autoload": {
         "psr-4": {
             "Makers99\\WpDbExportClean\\": "src/"
