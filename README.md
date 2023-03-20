@@ -48,10 +48,26 @@ The command accepts the result filename as argument. If omitted, it defaults to
 
 ## Integration
 
+### Supported plugins
+
+- WordPress Core (keeping only posts and comments from retained users, omitting revisions, transients and caches)
+- [WooCommerce](https://wordpress.org/plugins/woocommerce/) (only orders from retained users, omitting scheduled actions and sessions)
+- [WooCommerce Subscriptions](https://woocommerce.com/products/woocommerce-subscriptions/) (only subscriptions from retained users)
+- [Gravityforms](https://www.gravityforms.com/) (omitting revisions, entries, and statistics)
+- [wp-lister-amazon](https://www.wplab.com/plugins/wp-lister-for-amazon/), [wp-lister-ebay](https://www.wplab.com/plugins/wp-lister-for-ebay/) (omitting feeds, jobs, logs)
+- [Yoast wordpress-seo](https://wordpress.org/plugins/wordpress-seo/) (omitting index tracking, migrations, links)
+
+
 ### Including more users in the database export
 
 The `wp db export-clean` command only includes all users having the role administrator by default. Use the filter hook `'wp-db-export-clean/allowed-emails'` to add more users:
 ```php
+/**
+ * Customizes list of email addresses to retain in clean database dump.
+ *
+ * @return array
+ *   An array whose items are email addresses to keep.
+ */
 add_filter('wp-db-export-clean/allowed-emails', function ($allowed_emails) {
   global $wpdb;
   $users = $wpdb->get_col(
@@ -60,6 +76,74 @@ add_filter('wp-db-export-clean/allowed-emails', function ($allowed_emails) {
   return array_unique(array_merge($allowed_emails, $users));
 });
 ```
+In addition, you can include users by ID:
+```php
+/**
+ * Customizes list of user IDs to retain in clean database dump.
+ *
+ * @return array
+ *   An array whose items are user IDs to keep.
+ */
+add_filter('wp-db-export-clean/allowed-user-ids', function ($allowedUserIds) {
+  $allowedUserIds[] = 123;
+  $allowedUserIds[] = 456;
+  return array_unique($allowedUserIds);
+});
+```
+
+### Including more WooCommerce orders or subscriptions in the database export
+
+```php
+/**
+ * Customizes list of shop order/subscription IDs to retain in clean database dump.
+ *
+ * @return array
+ *   An array whose items are shop_order IDs to keep.
+ */
+add_filter('wp-db-export-clean/allowed-order-ids', function ($allowedOrderIds) {
+  $allowedOrderIds[] = 123456;
+  return array_unique($allowedOrderIds);
+});
+```
+
+### Excluding more/custom data in the database export
+
+Implement the following filter hook to customize the where conditions for all tables.
+
+```php
+/**
+ * Customizes select query conditions for each table in clean database dump.
+ *
+ * @return array
+ *   An array whose keys are table names and whose values are SQL WHERE clause conditions.
+ */
+add_filter('wp-db-export-clean/table-wheres', function ($tableWheres) {
+  global $wpdb;
+
+  $tableWheres = array_merge($tableWheres, [
+    "{$wpdb->prefix}my_log" => '1 = 0',
+    "{$wpdb->prefix}my_userdata" => "user_id IN ({$allowedUserIds})",
+  ]);
+  return $tableWheres;
+});
+```
+
+### Excluded licenses and API keys
+
+When passing the `--remove-keys` option, the following plugins are currently supported:
+
+- WooCommerce (PayPal)
+- [WooCommerce PayPal Plus](https://www.angelleye.com/product/woocommerce-paypal-plus-plugin/)
+- [WooCommerce PayPal Express Checkout](https://woocommerce.com/document/paypal-express-checkout/) (woocommerce-gateway-paypal-express-checkout)
+- [wp-lister-amazon](https://www.wplab.com/plugins/wp-lister-for-amazon/)
+- [wp-lister-ebay](https://www.wplab.com/plugins/wp-lister-for-ebay/)
+- [Gravityforms](https://www.gravityforms.com/)
+- [WooThemes](https://www.woothemes-plugins.com/) (wp-all-import, wp-all-export)
+- [Optimus](https://optimus.io/)
+- [Elementor](https://elementor.com/)
+- [SearchWP](https://searchwp.com/)
+- [Gravityforms Zero Spam](https://www.gravityforms.com/add-ons/zero-spam/)
+- [WooCommerce Amazon Payments](https://wordpress.org/plugins/woocommerce-gateway-amazon-payments-advanced/)
 
 
 ## Installation
