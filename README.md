@@ -57,10 +57,31 @@ The command accepts the result filename as argument. If omitted, it defaults to
 - [wp-lister-amazon](https://www.wplab.com/plugins/wp-lister-for-amazon/), [wp-lister-ebay](https://www.wplab.com/plugins/wp-lister-for-ebay/) (omitting feeds, jobs, logs)
 - [Yoast wordpress-seo](https://wordpress.org/plugins/wordpress-seo/) (omitting index tracking, migrations, links)
 
+### Placing the filter hooks
+
+`wp db export-clean` runs directly after WordPress is loaded (like `wp db export`), which means that only wp-config.php and plugins are loaded but WordPress is not bootstrapped with init hooks.  You can place your hooks into a must-use plugin; for example:
+
+`wp-content/mu-plugins/wp-cli-db-export-clean.php`:
+```php
+<?php
+
+/*
+  Plugin Name: wp db export-clean Customizations
+  Version: 1.0.0
+  Description: Includes test users in the clean database dump.
+*/
+
+add_filter('wp-db-export-clean/allowed-emails', function ($allowed_emails) {
+  return array_unique(array_merge($allowed_emails, [
+    'test@example.com',
+  ]));
+});
+```
 
 ### Including more users in the database export
 
-The `wp db export-clean` command only includes all users having the role administrator by default. Use the filter hook `'wp-db-export-clean/allowed-emails'` to add more users:
+`wp db export-clean` only includes users having the role Administrator by default. Use the filter hook `'wp-db-export-clean/allowed-emails'` to include more users in the database dump:
+
 ```php
 /**
  * Customizes list of email addresses to retain in clean database dump.
