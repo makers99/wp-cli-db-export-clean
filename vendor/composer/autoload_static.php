@@ -29,19 +29,8 @@ class ComposerStaticInit451d81277e04cb387b46be837ee462d9
     );
 
     public static $classMap = array (
-        'Ifsnop\\Mysqldump\\CompressBzip2' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
-        'Ifsnop\\Mysqldump\\CompressGzip' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
-        'Ifsnop\\Mysqldump\\CompressGzipstream' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
-        'Ifsnop\\Mysqldump\\CompressManagerFactory' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
-        'Ifsnop\\Mysqldump\\CompressMethod' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
-        'Ifsnop\\Mysqldump\\CompressNone' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'Ifsnop\\Mysqldump\\Mysqldump' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
-        'Ifsnop\\Mysqldump\\TypeAdapter' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
-        'Ifsnop\\Mysqldump\\TypeAdapterDblib' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
-        'Ifsnop\\Mysqldump\\TypeAdapterFactory' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
-        'Ifsnop\\Mysqldump\\TypeAdapterMysql' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
-        'Ifsnop\\Mysqldump\\TypeAdapterPgsql' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
-        'Ifsnop\\Mysqldump\\TypeAdapterSqlite' => __DIR__ . '/..' . '/ifsnop/mysqldump-php/src/Ifsnop/Mysqldump/Mysqldump.php',
         'Makers99\\WpDbExportClean\\CliCommand' => __DIR__ . '/../..' . '/src/CliCommand.php',
     );
 

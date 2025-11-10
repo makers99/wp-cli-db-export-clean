@@ -35,5 +35,8 @@
         "psr-4": {
             "Makers99\\WpDbExportClean\\": "src/"
         }
+    },
+    "config": {
+        "optimize-autoloader": true
     }
 }
