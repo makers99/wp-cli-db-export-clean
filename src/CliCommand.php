@@ -97,6 +97,10 @@ class CliCommand extends \WP_CLI_Command {
     try {
       $dump = new IMysqldump('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASSWORD, [
         'add-drop-table' => TRUE,
+        // WordPress tables are utf8mb4, but mysqldump-php defaults to utf8
+        // (utf8mb3); MySQL then replaces every 4-byte character (i.e., most
+        // emojis) with "?" while converting the result set for the connection.
+        'default-character-set' => IMysqldump::UTF8MB4,
       ]);
 
       $tableWheres = [
