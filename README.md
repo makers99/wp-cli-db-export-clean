@@ -193,7 +193,7 @@ When passing the `--remove-keys` option, the following plugins are currently sup
     ```
     ```yaml
     require:
-      - .wp-cli/packages/db-export-clean/plugin.php
+      - .wp-cli/packages/db-export-clean/package.php
     ```
 
 ### Install with Composer
