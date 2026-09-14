@@ -127,6 +127,11 @@ class CliCommand extends \WP_CLI_Command {
         $tableWheres["{$wpdb->prefix}woocommerce_order_itemmeta"] = "order_item_id IN ({$allowedOrderItemIds})";
       }
 
+      // Remove wp-mail-smtp related entries.
+      $tableWheres = array_merge($tableWheres, [
+        "{$wpdb->prefix}wpmailsmtp_emails_log" => '1 = 0',
+      ]);
+
       // Remove gravityforms related entries.
       $tableWheres = array_merge($tableWheres, [
         "{$wpdb->prefix}gf_entry" => '1 = 0',
