@@ -177,6 +177,15 @@ class CliCommand extends \WP_CLI_Command {
         "{$wpdb->prefix}wpmailsmtp_emails_log" => '1 = 0',
       ]);
 
+      // Retain only OAuth tokens and authorization codes of retained users
+      // (wp-oauth-server). They are credentials: a token copied into another
+      // environment authenticates there, wherever the same client is registered.
+      $tableWheres = array_merge($tableWheres, [
+        "{$wpdb->prefix}oauth_access_tokens" => "user_id IN ({$allowedUserIds})",
+        "{$wpdb->prefix}oauth_authorization_codes" => "user_id IN ({$allowedUserIds})",
+        "{$wpdb->prefix}oauth_refresh_tokens" => "user_id IN ({$allowedUserIds})",
+      ]);
+
       // Remove gravityforms related entries.
       $tableWheres = array_merge($tableWheres, [
         "{$wpdb->prefix}gf_entry" => '1 = 0',
