@@ -56,11 +56,13 @@ class CliCommand extends \WP_CLI_Command {
     ];
 
     // Set allowed email hosts.
-    $adminsEmails = array_map(function ($user) {
+    $allowedRoles = apply_filters(static::PREFIX . '/allowed-roles', ['administrator', 'shop_manager']);
+    // An empty role__in would match all users.
+    $adminsEmails = !$allowedRoles ? [] : array_map(function ($user) {
       return $user->user_email;
     }, get_users([
       'fields' => ['user_email'],
-      'role__in' => ['administrator'],
+      'role__in' => $allowedRoles,
     ]));
     $allowedEmails = apply_filters(static::PREFIX . '/allowed-emails', $adminsEmails);
 
@@ -69,7 +71,8 @@ class CliCommand extends \WP_CLI_Command {
 
     // Retain user ids about to be skipped for further filters.
     $emailsPlaceholder = implode(',', array_fill(0, count($allowedEmails), '%s'));
-    $allowedUserIds = implode(',', $wpdb->get_col(
+    // An empty list would produce invalid SQL "IN ()".
+    $allowedUserIds = !$allowedEmails ? '' : implode(',', $wpdb->get_col(
       $wpdb->prepare("SELECT u.ID FROM {$wpdb->prefix}users u WHERE u.user_email IN ({$emailsPlaceholder})", $allowedEmails)
     ));
     $allowedUserIds = apply_filters(static::PREFIX . '/allowed-user-ids', $allowedUserIds);
@@ -167,6 +170,11 @@ class CliCommand extends \WP_CLI_Command {
         "{$wpdb->prefix}wc_order_tax_lookup" => "order_id IN ({$allowedOrderIds})",
         "{$wpdb->prefix}wc_order_coupon_lookup" => "order_id IN ({$allowedOrderIds})",
         "{$wpdb->prefix}wc_customer_lookup" => "user_id IN ({$allowedUserIds})",
+      ]);
+
+      // Remove wp-mail-smtp related entries.
+      $tableWheres = array_merge($tableWheres, [
+        "{$wpdb->prefix}wpmailsmtp_emails_log" => '1 = 0',
       ]);
 
       // Remove gravityforms related entries.
