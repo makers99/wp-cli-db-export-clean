@@ -56,6 +56,7 @@ The command accepts the result filename as argument. If omitted, it defaults to
 - [Gravityforms](https://www.gravityforms.com/) (omitting revisions, entries, and statistics)
 - [wp-lister-amazon](https://www.wplab.com/plugins/wp-lister-for-amazon/), [wp-lister-ebay](https://www.wplab.com/plugins/wp-lister-for-ebay/) (omitting feeds, jobs, logs)
 - [Yoast wordpress-seo](https://wordpress.org/plugins/wordpress-seo/) (omitting index tracking, migrations, links)
+- [WP OAuth Server](https://wp-oauth.com/) (only access tokens, refresh tokens and authorization codes of retained users)
 
 ### Placing the filter hooks
 
