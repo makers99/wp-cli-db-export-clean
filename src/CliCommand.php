@@ -112,11 +112,6 @@ class CliCommand extends \WP_CLI_Command {
     // is retained when there are no orders to keep.
     $allowedOrderIds = $allowedOrderIds ?: '0';
 
-    $allowedOrderItemIds = implode(',', $wpdb->get_col("
-      SELECT oi.order_item_id FROM {$wpdb->prefix}woocommerce_order_items oi
-        WHERE oi.order_id IN ({$allowedOrderIds})
-    ")) ?: '0';
-
     $postTableWheres = [
       'post_type NOT IN ("revision", "customize_changeset", "oembed_cache")',
       '(post_type NOT IN ("shop_order", "shop_order_refund", "shop_order_placehold", "shop_subscription") OR ID IN (' . $allowedOrderIds . '))',
@@ -147,7 +142,7 @@ class CliCommand extends \WP_CLI_Command {
         "{$wpdb->prefix}actionscheduler_logs" => '1 = 0',
         "{$wpdb->prefix}woocommerce_sessions" => '1 = 0',
         "{$wpdb->prefix}woocommerce_order_items" => "order_id IN ({$allowedOrderIds})",
-        "{$wpdb->prefix}woocommerce_order_itemmeta" => "order_item_id IN ({$allowedOrderItemIds})",
+        "{$wpdb->prefix}woocommerce_order_itemmeta" => "order_item_id IN (SELECT oi.order_item_id FROM {$wpdb->prefix}woocommerce_order_items oi WHERE oi.order_id IN ({$allowedOrderIds}))",
         "{$wpdb->prefix}woocommerce_downloadable_product_permissions" => "order_id IN ({$allowedOrderIds})",
         "{$wpdb->prefix}wc_download_log" => '1 = 0',
         "{$wpdb->prefix}woocommerce_payment_tokens" => "user_id IN ({$allowedUserIds})",
