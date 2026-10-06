@@ -73,26 +73,54 @@ class CliCommand extends \WP_CLI_Command {
       $wpdb->prepare("SELECT u.ID FROM {$wpdb->prefix}users u WHERE u.user_email IN ({$emailsPlaceholder})", $allowedEmails)
     ));
     $allowedUserIds = apply_filters(static::PREFIX . '/allowed-user-ids', $allowedUserIds);
+    // An empty list would produce invalid SQL "IN ()".
+    $allowedUserIds = $allowedUserIds ?: '0';
 
-    // Retain only order/subscription IDs corresponding to allowed users.
-    $allowedOrderIds = implode(',', $wpdb->get_col("
+    // Retain only order/subscription IDs corresponding to allowed users,
+    // including their refunds.
+    $allowedOrderIds = $wpdb->get_col("
       SELECT p.ID FROM {$wpdb->prefix}posts p
         JOIN {$wpdb->prefix}postmeta pm ON pm.post_id = p.ID
         WHERE p.post_type IN (\"shop_order\", \"shop_subscription\")
           AND pm.meta_key = '_customer_user'
           AND pm.meta_value IN ({$allowedUserIds})
-    "));
+    ");
+    if ($allowedOrderIds) {
+      $allowedOrderIds = array_merge($allowedOrderIds, $wpdb->get_col("
+        SELECT p.ID FROM {$wpdb->prefix}posts p
+          WHERE p.post_type = \"shop_order_refund\"
+            AND p.post_parent IN (" . implode(',', $allowedOrderIds) . ")
+      "));
+    }
+    // With High-Performance Order Storage (HPOS), orders live in custom tables
+    // and the legacy posts only exist as placeholders (or as copies while
+    // compatibility mode synchronizes both).
+    $hasOrderTables = (bool) $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $wpdb->esc_like("{$wpdb->prefix}wc_orders")));
+    if ($hasOrderTables) {
+      $allowedOrderIds = array_merge($allowedOrderIds, $wpdb->get_col("
+        SELECT o.id FROM {$wpdb->prefix}wc_orders o
+          WHERE o.customer_id IN ({$allowedUserIds})
+            OR o.parent_order_id IN (
+              SELECT po.id FROM {$wpdb->prefix}wc_orders po
+                WHERE po.customer_id IN ({$allowedUserIds})
+            )
+      "));
+    }
+    $allowedOrderIds = implode(',', array_unique($allowedOrderIds));
     $allowedOrderIds = apply_filters(static::PREFIX . '/allowed-order-ids', $allowedOrderIds);
+    // Order tables are always filtered, so that no order of a removed customer
+    // is retained when there are no orders to keep.
+    $allowedOrderIds = $allowedOrderIds ?: '0';
 
-    $allowedOrderItemIds = !$allowedOrderIds ? '' : implode(',', $wpdb->get_col("
+    $allowedOrderItemIds = implode(',', $wpdb->get_col("
       SELECT oi.order_item_id FROM {$wpdb->prefix}woocommerce_order_items oi
         WHERE oi.order_id IN ({$allowedOrderIds})
-    "));
+    ")) ?: '0';
 
-    $postTableWheres = ['post_type NOT IN ("revision", "customize_changeset", "oembed_cache")'];
-    if ($allowedOrderIds) {
-      $postTableWheres[] = '(post_type NOT IN ("shop_order", "shop_subscription") OR ID IN (' . $allowedOrderIds . '))';
-    }
+    $postTableWheres = [
+      'post_type NOT IN ("revision", "customize_changeset", "oembed_cache")',
+      '(post_type NOT IN ("shop_order", "shop_order_refund", "shop_order_placehold", "shop_subscription") OR ID IN (' . $allowedOrderIds . '))',
+    ];
 
     try {
       $dump = new IMysqldump('mysql:host=' . DB_HOST . ';dbname=' . DB_NAME, DB_USER, DB_PASSWORD, [
@@ -118,14 +146,33 @@ class CliCommand extends \WP_CLI_Command {
         "{$wpdb->prefix}actionscheduler_groups" => '1 = 0',
         "{$wpdb->prefix}actionscheduler_logs" => '1 = 0',
         "{$wpdb->prefix}woocommerce_sessions" => '1 = 0',
+        "{$wpdb->prefix}woocommerce_order_items" => "order_id IN ({$allowedOrderIds})",
+        "{$wpdb->prefix}woocommerce_order_itemmeta" => "order_item_id IN ({$allowedOrderItemIds})",
+        "{$wpdb->prefix}woocommerce_downloadable_product_permissions" => "order_id IN ({$allowedOrderIds})",
+        "{$wpdb->prefix}wc_download_log" => '1 = 0',
+        "{$wpdb->prefix}woocommerce_payment_tokens" => "user_id IN ({$allowedUserIds})",
+        "{$wpdb->prefix}woocommerce_payment_tokenmeta" => "payment_token_id IN (SELECT t.token_id FROM {$wpdb->prefix}woocommerce_payment_tokens t WHERE t.user_id IN ({$allowedUserIds}))",
+        "{$wpdb->prefix}woocommerce_log" => '1 = 0',
       ]);
-      if ($allowedOrderIds) {
-        $tableWheres["{$wpdb->prefix}comments"] = "comment_post_ID IN ({$allowedOrderIds})";
-        $tableWheres["{$wpdb->prefix}woocommerce_order_items"] = "order_id IN ({$allowedOrderIds})";
-      }
-      if ($allowedOrderItemIds) {
-        $tableWheres["{$wpdb->prefix}woocommerce_order_itemmeta"] = "order_item_id IN ({$allowedOrderItemIds})";
-      }
+
+      // Order notes are comments on the order ID in both storage modes.
+      $commentWhere = "comment_type <> 'order_note' OR comment_post_ID IN ({$allowedOrderIds})";
+      $tableWheres["{$wpdb->prefix}comments"] = $commentWhere;
+      $tableWheres["{$wpdb->prefix}commentmeta"] = "comment_id IN (SELECT c.comment_ID FROM {$wpdb->prefix}comments c WHERE {$commentWhere})";
+
+      // Remove woocommerce High-Performance Order Storage (HPOS) entries and
+      // analytics lookup data of other customers.
+      $tableWheres = array_merge($tableWheres, [
+        "{$wpdb->prefix}wc_orders" => "id IN ({$allowedOrderIds})",
+        "{$wpdb->prefix}wc_orders_meta" => "order_id IN ({$allowedOrderIds})",
+        "{$wpdb->prefix}wc_order_addresses" => "order_id IN ({$allowedOrderIds})",
+        "{$wpdb->prefix}wc_order_operational_data" => "order_id IN ({$allowedOrderIds})",
+        "{$wpdb->prefix}wc_order_stats" => "order_id IN ({$allowedOrderIds})",
+        "{$wpdb->prefix}wc_order_product_lookup" => "order_id IN ({$allowedOrderIds})",
+        "{$wpdb->prefix}wc_order_tax_lookup" => "order_id IN ({$allowedOrderIds})",
+        "{$wpdb->prefix}wc_order_coupon_lookup" => "order_id IN ({$allowedOrderIds})",
+        "{$wpdb->prefix}wc_customer_lookup" => "user_id IN ({$allowedUserIds})",
+      ]);
 
       // Remove gravityforms related entries.
       $tableWheres = array_merge($tableWheres, [
