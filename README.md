@@ -80,7 +80,22 @@ add_filter('wp-db-export-clean/allowed-emails', function ($allowed_emails) {
 
 ### Including more users in the database export
 
-`wp db export-clean` only includes users having the role Administrator by default. Use the filter hook `'wp-db-export-clean/allowed-emails'` to include more users in the database dump:
+`wp db export-clean` only includes users having the role Administrator or Shop manager (WooCommerce) by default. Use the filter hook `'wp-db-export-clean/allowed-roles'` to change the included roles:
+
+```php
+/**
+ * Customizes list of user roles to retain in clean database dump.
+ *
+ * @return array
+ *   An array whose items are role names to keep.
+ */
+add_filter('wp-db-export-clean/allowed-roles', function ($allowedRoles) {
+  $allowedRoles[] = 'editor';
+  return $allowedRoles;
+});
+```
+
+Use the filter hook `'wp-db-export-clean/allowed-emails'` to include more individual users in the database dump:
 
 ```php
 /**
