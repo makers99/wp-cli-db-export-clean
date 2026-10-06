@@ -51,7 +51,7 @@ The command accepts the result filename as argument. If omitted, it defaults to
 ### Supported plugins
 
 - WordPress Core (keeping only posts and comments from retained users, omitting revisions, transients and caches)
-- [WooCommerce](https://wordpress.org/plugins/woocommerce/) (only orders from retained users, omitting scheduled actions and sessions)
+- [WooCommerce](https://wordpress.org/plugins/woocommerce/) (only orders, order notes, analytics, downloads, and payment tokens from retained users, omitting scheduled actions, sessions, and logs; supports both legacy post storage and High-Performance Order Storage (HPOS))
 - [WooCommerce Subscriptions](https://woocommerce.com/products/woocommerce-subscriptions/) (only subscriptions from retained users)
 - [Gravityforms](https://www.gravityforms.com/) (omitting revisions, entries, and statistics)
 - [wp-lister-amazon](https://www.wplab.com/plugins/wp-lister-for-amazon/), [wp-lister-ebay](https://www.wplab.com/plugins/wp-lister-for-ebay/) (omitting feeds, jobs, logs)
